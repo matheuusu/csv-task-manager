@@ -1,6 +1,10 @@
 import { createServer } from "node:http"
+import { json } from "./middlewares/json.js"
 
-const server = createServer((req, res) => {
+const server = createServer(async (req, res) => {
+  const { method, url } = req
+
+  await json(req, res)
 
   return res
     .writeHead(404).end(JSON.stringify({ message: "The route is not found" }))
