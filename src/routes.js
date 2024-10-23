@@ -28,7 +28,7 @@ export const routes = [
       if (!title || !description) {
         return res
           .writeHead(400)
-          .end(JSON.stringify({ message: "Required field is missing in the request body." }))
+          .end(JSON.stringify({ message: "Required field is missing in the request body" }))
       }
 
       const task = {
@@ -42,7 +42,40 @@ export const routes = [
 
       database.insert("tasks", task)
 
-      return res.writeHead(201).end(JSON.stringify({ message: "The task has created" }))
+      return res
+        .writeHead(201)
+        .end(JSON.stringify({ message: "The task has created" }))
+    }
+  },
+  {
+    method: "PUT",
+    path: buildRoutePath('/tasks/:id'),
+    handler: (req, res) => {
+      const { id } = req.params
+      const { title, description } = req.body ?? {}
+
+      const [existingTask] = database.select('tasks', { id })
+
+
+      if (!existingTask) {
+        return res
+          .writeHead(404)
+          .end(JSON.stringify({ message: "Task not found" }))
+      }
+
+      if (!title && !description) {
+        return res
+          .writeHead(400)
+          .end(JSON.stringify({ message: "Required field, title or description, is missing in the request body" }))
+      }
+
+      database.update('tasks', id, {
+        title: title ?? existingTask.title,
+        description: description ?? existingTask.description,
+        updated_at: new Date()
+      })
+
+      return res.writeHead(204).end()
     }
   }
 ]
